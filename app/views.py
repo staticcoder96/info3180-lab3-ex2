@@ -6,7 +6,9 @@ This file creates your application.
 """
 
 from app import app
-from flask import render_template, request, redirect, url_for
+import smtplib
+from flask import render_template, request, redirect, url_for,flash
+app.secret_key = 'secret_key'
 
 
 ###
@@ -23,6 +25,58 @@ def home():
 def about():
     """Render the website's about page."""
     return render_template('about.html', name="Mary Jane")
+    
+@app.route('/contact', methods=['GET', 'POST'])
+def contact():
+    """Render the website's contact page"""
+    """Send an email when a post request is made"""
+    
+    if request.method == 'POST':
+        send_mail(request.form['name'],request.form['mail'], request.form['subject'], request.form['message'])
+        flash('Message Sent')
+        return redirect(url_for('home'))
+        
+    else:
+        flash("Message not sent")
+        
+    return render_template('contact.html')
+    
+
+
+def send_mail(name,mail,sub,msg):
+    
+    from_addr = 'stephanieramsay6@gmail.com'
+    
+    name = request.form['name']
+    mail = request.form['mail']
+    sub = request.form['subject']
+    msg = request.form['message']
+    
+    
+    
+    server = smtplib.SMTP('smtp.gmail.com',587) #error fixed
+    server.ehlo()
+    server.starttls()
+    server.ehlo()
+    server.login(from_addr, password)
+    
+    BODY = '\r\n'.join(['To: %s' %mail,
+        'From: %s' %from_addr,
+        'Subject: %s' %sub,
+        '',
+        msg
+        ])
+        
+    try:
+            server.sendmail(from_addr, [mail], BODY)
+            print 'EMAIL SENT'
+    except:
+            print 'ERROR Sending Email'
+            
+    server.quit()
+        
+    
+    
 
 
 ###
